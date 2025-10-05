@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Traffic System - Project Showcase</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // No custom theme colors in Tailwind config, we'll use CSS variables for theme switching
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'title': ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+                        'mono': ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Define the default (Light) theme colors using CSS variables */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --secondary-bg: #f9fafb;
+            --border-color: #000000;
+        }
+
+        /* Define the Dark theme colors */
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --secondary-bg: #111111;
+            --border-color: #ffffff;
+        }
+
+        /* Apply the clean, monospaced font to the entire body and enable smooth transition */
+        body {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
+            text-transform: uppercase;
+            line-height: 1.6;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            /* Smooth color transition for a clean theme change */
+            transition: background-color 0.5s ease, color 0.5s ease; 
+        }
+
+        /* Use variables for border colors */
+        .hr-separator {
+            border-top: 2px solid var(--border-color);
+        }
+        .code-block {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid var(--border-color); /* Use variable for border */
+            padding: 1.5rem;
+            line-height: 1.5;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            background-color: var(--bg-color); /* Use variable for consistency */
+            color: var(--text-color);
+        }
+        
+        /* Custom scrollbar using theme variables */
+        .code-block::-webkit-scrollbar { width: 8px; }
+        .code-block::-webkit-scrollbar-thumb {
+            background-color: var(--border-color);
+            border-radius: 0;
+        }
+        .code-block::-webkit-scrollbar-track {
+            background-color: var(--secondary-bg);
+        }
+
+        /* Responsive Iframe container with a strong border */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            border: 4px solid var(--border-color); /* Use variable for border */
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Schematic container with secondary background and primary border */
+        .schematic-box {
+            padding: 0.5rem;
+            border: 4px solid var(--border-color);
+            background-color: var(--secondary-bg);
+        }
+
+        /* Update dynamic elements */
+        .text-default {
+            color: var(--text-color);
+        }
+        .bg-default-button {
+            background-color: var(--border-color);
+            color: var(--bg-color);
+        }
+        .border-default {
+            border-color: var(--border-color);
+        }
+    </style>
+</head>
+<body data-theme="light" class="min-h-screen p-6 sm:p-12 md:p-16">
+
+    <!-- Main Content Container (Centered and Max Width) -->
+    <div class="max-w-5xl mx-auto space-y-16 sm:space-y-24">
+
+        <!-- Header and Introduction Section (Enhanced for responsiveness) -->
+        <header class="text-center py-8">
+            <h1 class="font-title text-5xl sm:text-7xl md:text-8xl font-extrabold mb-10 tracking-widest leading-none text-default">
+                TRAFFIC <br class="sm:hidden"> SYSTEM
+            </h1>
+            <p class="text-base sm:text-lg leading-relaxed max-w-3xl mx-auto border-default border-t-2 border-b-2 py-5 px-2" style="color: var(--text-color); opacity: 0.7;">
+                This website serves as the technical documentation for the Smart LED Traffic System project. It showcases the microcontroller code, circuit design, and final execution video. The focus is on clean hardware/software integration and efficient traffic cycle management.
+            </p>
+        </header>
+
+        <!-- Navigation Links - Responsive and better touch targets -->
+        <nav class="flex flex-wrap justify-center items-center space-x-4 sm:space-x-10 text-xl font-bold">
+            <a href="#video" class="p-3 hover:opacity-70 underline underline-offset-4 transition duration-300" style="color: var(--text-color);">
+                VIDEO
+            </a>
+            <a href="#schematics" class="p-3 hover:opacity-70 underline underline-offset-4 transition duration-300" style="color: var(--text-color);">
+                SCHEMATIC
+            </a>
+            <a href="#code" class="p-3 hover:opacity-70 underline underline-offset-4 transition duration-300" style="color: var(--text-color);">
+                CODE
+            </a>
+            <!-- THEME TOGGLE BUTTON -->
+            <button id="themeToggleBtn" onclick="toggleTheme()" class="p-3 text-sm font-bold border-2 border-default hover:bg-opacity-80 transition duration-300" style="color: var(--text-color); border-color: var(--border-color);">
+                LIGHT / DARK
+            </button>
+        </nav>
+
+        <!-- Horizontal Rule Separator -->
+        <hr class="hr-separator my-10">
+
+        <!-- Project Overview -->
+        <section class="p-2 sm:p-0">
+            <h2 class="text-3xl sm:text-4xl font-title font-extrabold tracking-widest mb-6 text-default">PROJECT DETAILS</h2>
+            <div class="space-y-4 text-base" style="color: var(--text-color); opacity: 0.7;">
+                <p>
+                    The system implements a simple, robust traffic light sequence using an Arduino microcontroller. This demonstration controls a single intersection light, cycling through the standard Red, Yellow, and Green phases with precise, programmed delays for each state.
+                </p>
+                <ul class="ml-4 list-disc list-inside space-y-3 text-sm">
+                    <li><strong class="text-default">Hardware:</strong> ARDUINO UNO, 3 LEDS, RESISTORS.</li>
+                    <li><strong class="text-default">Language:</strong> C/C++ (ARDUINO SKETCH).</li>
+                    <li><strong class="text-default">Cycle Time:</strong> $12$ SECONDS TOTAL PER CYCLE. ($5$s RED, $2$s YELLOW, $5$s GREEN).</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- Horizontal Rule Separator -->
+        <hr class="hr-separator my-10">
+
+        <!-- Video Showcase Section -->
+        <section id="video" class="p-2 sm:p-0">
+            <h2 class="text-3xl sm:text-4xl font-title font-extrabold tracking-widest mb-6 text-default">VIDEO DEMONSTRATION</h2>
+            <div class="video-container">
+                <!-- REPLACE THIS YOUTUBE URL WITH YOUR OWN VIDEO LINK -->
+                <iframe
+                    src="video.mp4"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    title="Project Video Demonstration Placeholder"
+                    loading="lazy">
+                </iframe>
+            </div>
+            <p class="mt-6 text-center text-xs" style="color: var(--text-color); opacity: 0.7;">
+                THE FINAL WORKING PROTOTYPE.
+            </p>
+        </section>
+
+        <!-- Horizontal Rule Separator -->
+        <hr class="hr-separator my-10">
+
+        <!-- Schematics Section -->
+        <section id="schematics" class="p-2 sm:p-0">
+            <h2 class="text-3xl sm:text-4xl font-title font-extrabold tracking-widest mb-6 text-default">CIRCUIT SCHEMATIC</h2>
+            <div class="schematic-box">
+                <!-- Placeholder for Schematic Image - adjusted size for better responsiveness -->
+                <img
+                    src="schematics.png"
+                    onerror="this.onerror=null; this.src='https://placehold.co/1200x600/ffffff/000000?text=SCHEMATIC+IMAGE+FAILED+TO+LOAD'"
+                    alt="Circuit Schematic Diagram"
+                    class="w-full h-auto object-cover max-h-[600px]"
+                />
+            </div>
+            <p class="mt-6 text-center text-xs" style="color: var(--text-color); opacity: 0.7;">
+                WIRING LAYOUT FROM ARDUINO TO LEDS (DIGITAL PINS 11, 12, 13).
+            </p>
+        </section>
+
+        <!-- Horizontal Rule Separator -->
+        <hr class="hr-separator my-10">
+
+        <!-- Code Section -->
+        <section id="code" class="p-2 sm:p-0">
+            <h2 class="text-3xl sm:text-4xl font-title font-extrabold tracking-widest mb-6 text-default">SOURCE CODE</h2>
+
+            <div class="relative">
+                <button
+                    id="copyCodeBtn"
+                    class="absolute top-0 right-0 px-3 py-1 text-xs font-semibold transition duration-300 z-10 bg-default-button hover:opacity-80"
+                    onclick="copyCode()">
+                    COPY CODE
+                </button>
+                <div id="copyMessage" class="absolute top-0 right-24 text-sm opacity-0 transition-opacity duration-300" style="color: var(--text-color);">COPIED!</div>
+
+                <pre class="code-block">
+<code class="language-cpp" id="projectCode">
+int red = 13;
+int yellow = 12;
+int green = 11;
+
+void setup() {
+  pinMode(red, OUTPUT);
+  pinMode(yellow, OUTPUT);
+  pinMode(green, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(red, HIGH);
+  digitalWrite(yellow, LOW);
+  digitalWrite(green, LOW);
+  delay(5000);
+
+  digitalWrite(red, LOW);
+  digitalWrite(yellow, HIGH);
+  digitalWrite(green, LOW);
+  delay(2000);
+
+  digitalWrite(red, LOW);
+  digitalWrite(yellow, LOW);
+  digitalWrite(green, HIGH);
+  delay(5000);
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- Horizontal Rule Separator -->
+        <hr class="hr-separator my-10">
+
+        <!-- Footer -->
+        <footer class="text-center py-6 text-xs" style="color: var(--text-color); opacity: 0.7;">
+            <p>&copy; 2025 PROJECT PORTFOLIO</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Set the initial theme based on localStorage or default to 'light'
+        function setupTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+
+        // Toggle the theme between light and dark and save the preference
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Run theme setup on load
+        window.onload = setupTheme;
+
+        // JavaScript for the Copy Code button functionality
+        function copyCode() {
+            const codeElement = document.getElementById('projectCode');
+            const codeToCopy = codeElement.innerText;
+            const copyMessage = document.getElementById('copyMessage');
+
+            // Use document.execCommand('copy') for better compatibility in iframe environments
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = codeToCopy;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                // Show success message
+                copyMessage.classList.add('opacity-100');
+                setTimeout(() => {
+                    copyMessage.classList.remove('opacity-100');
+                }, 1500);
+
+            } catch (err) {
+                console.error('FAILED TO COPY TEXT: ', err);
+            }
+        }
+    </script>
+</body>
+</html>
